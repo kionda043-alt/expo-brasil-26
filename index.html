@@ -798,6 +798,8 @@ body.can-admin .adbtn{display:flex!important}
 .attract .bg{background-position:center!important}
 
 .brand .logo{height:4.4em!important}
+.adrooms{margin:.2em 0 .5em!important}
+.adrooms .chip[aria-pressed="true"]{background:var(--c)!important;border-color:var(--c)!important;color:var(--ink)!important}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1661,7 +1663,7 @@ function renderAgenda(){
   $('agIn').innerHTML=h;
 }
 /* ---------- admin: correções ao vivo (db compartilhado) ---------- */
-const ADM={db:null,user:null,can:false,edits:{},cfg:{},status:'',tab:'prog',q:'',open:null,local:false};
+const ADM={db:null,user:null,can:false,edits:{},cfg:{},status:'',tab:'prog',room:'all',q:'',open:null,local:false};
 function snapAll(){[...STANDS,...agAll()].forEach(x=>{if(!x.__o)x.__o={name:x.name,short:x.short,named:x.named,sold:x.sold,title:x.title,who:x.who,day:x.day,start:x.start,end:x.end,cancel:x.cancel,desc:x.desc}})}
 function applyEdits(){snapAll();
   [...STANDS,...TALKS,...SHOWS,...WORKS].forEach(x=>{Object.assign(x,x.__o);x.edited=false});
@@ -1707,10 +1709,12 @@ function renderAdmin(){
       return `<div class="adrow${o?' open':''}${e?' ed':''}"><button type="button" class="adh" data-adopen="${s.id}" style="--c:${CATS[s.cat].c}"><span class="no">${esc(s.no)}</span><span class="nm">${esc(s.named?s.name:T(s.sold?UI.adResv:UI.adFree))}<small>${esc(T(CATS[s.cat].n))}${e?' · '+esc(T(UI.adEdited)):''}</small></span>${ic('arrow')}</button>`+
       (o?`<div class="adf">${fld('af_name',UI.adName,s.named?s.name:'')}<label class="af"><span>${esc(T(UI.adStatus))}</span><select id="af_status"><option value="sold"${s.sold?' selected':''}>${esc(T(UI.adResv))}</option><option value="free"${!s.sold?' selected':''}>${esc(T(UI.adFree))}</option></select></label><div class="adb"><button type="button" class="pb" data-adsave="${s.id}" data-adtype="stand">${esc(T(UI.adSave))}</button>${e?`<button type="button" class="pb ghost" data-addrop="${s.id}">${esc(T(UI.adRevert))}</button>`:''}</div></div>`:'')+`</div>`}).join('')+`</div>`;
   }else if(ADM.tab==='prog'){
-    const all=agAll().filter(x=>!q||norm([T(x.title),x.who?T(x.who):'',x.start].join(' ')).includes(q)).sort((a,b)=>a.day-b.day||toMin(a.start)-toMin(b.start)).slice(0,q?80:30);
+    const RF=[['all',L('Todas','Todas','All','Alle'),'#FFFFFF'],['conf',K_CONF],['foro',K_FORO],['arena',K_ARENA],['lit',K_LIT],['stage',L('Escenario','Palco','Stage','Bühne')],['work',L('Talleres','Oficinas','Workshops','Workshops')]];
+    h+=`<div class="chips rooms adrooms" role="group">${RF.map(([k,n,c])=>`<button type="button" class="chip" data-adroom="${k}" aria-pressed="${ADM.room===k}" style="--c:${c||ROOMC[k]}">${k==='all'?'':'<span class="dot"></span>'}${esc(T(n))}</button>`).join('')}</div>`;
+    const all=agAll().filter(x=>(ADM.room==='all'||x.place===ADM.room)&&(!q||norm([T(x.title),x.who?T(x.who):'',x.start].join(' ')).includes(q))).sort((a,b)=>a.day-b.day||toMin(a.start)-toMin(b.start)).slice(0,q||ADM.room!=='all'?150:30);
     h+=`<p class="fine">${esc(T(UI.adHintP))}</p><button type="button" class="pb addnew" data-adnew="1">${ic('plus')}${esc(T(UI.adNew))}</button>`;
     if(ADM.open==='__new')h+=progForm({day:st.day||21,start:'15:00',end:'16:00',place:'conf',title:'',who:''},'__new');
-    h+=`<div class="adlist">`+all.map(x=>{const id=agId(x),o=ADM.open===id,e=ADM.edits[id];const room=x.place==='stage'?'Palco':x.place==='work'?'Workshop':T(ROOMK[x.place]||'');
+    h+=`<div class="adlist">`+all.map(x=>{const id=agId(x),o=ADM.open===id,e=ADM.edits[id];const room=x.place==='stage'?T(L('Escenario','Palco','Stage','Bühne')):x.place==='work'?T(L('Talleres','Oficinas','Workshops','Workshops')):T(ROOMK[x.place]||'');
       return `<div class="adrow${o?' open':''}${e?' ed':''}${x.cancel?' cx':''}"><button type="button" class="adh" data-adopen="${id}" style="--c:${ROOMC[x.place]||'#C6F032'}"><span class="no">${x.day}/11<br>${x.start}</span><span class="nm">${esc(T(x.title))}<small>${esc(room)}${x.cancel?' · '+esc(T(UI.adCancelled)):''}${e?' · '+esc(T(UI.adEdited)):''}</small></span>${ic('arrow')}</button>${o?progForm(x,id):''}</div>`}).join('')+`</div>`;
   }else{
     h+=`<div class="adf solo">${fld('af_url',UI.adUrl,ticketUrl(),'url')}<div class="adb"><button type="button" class="pb" data-adcfg="1">${esc(T(UI.adSave))}</button></div></div>`;
@@ -1726,6 +1730,7 @@ function progForm(x,id){const isNew=id==='__new';const tv=v=>v==null?'':T(v);
   `<div class="adb"><button type="button" class="pb" data-adsave="${id}" data-adtype="${isNew?'new':'prog'}">${esc(T(UI.adSave))}</button>${!isNew&&ADM.edits[id]?`<button type="button" class="pb ghost" data-addrop="${id}">${esc(T(x.nid?UI.adDelete:UI.adRevert))}</button>`:''}</div></div>`}
 function adminClick(t){
   if(t.dataset.adtab){ADM.tab=t.dataset.adtab;ADM.open=null;ADM.q='';renderAdmin();return true}
+  if(t.dataset.adroom){ADM.room=t.dataset.adroom;ADM.open=null;renderAdmin();return true}
   if(t.dataset.adopen){ADM.open=ADM.open===t.dataset.adopen?null:t.dataset.adopen;renderAdmin();return true}
   if(t.dataset.adnew){ADM.open=ADM.open==='__new'?null:'__new';renderAdmin();return true}
   if(t.dataset.addrop){dropEdit(t.dataset.addrop);ADM.open=null;return true}
