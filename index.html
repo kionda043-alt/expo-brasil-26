@@ -832,6 +832,34 @@ body.mfs .mzoom button{width:3em;height:3em}
   #vMap .msearch{padding-bottom:.4em}
   .bnav button{min-height:2.4em;padding:.35em .9em}
 }
+/* inicio: imágenes más cómodas dentro de la tarjeta y títulos en una línea */
+.dtile .art.fit{background:var(--abg)}
+.dtile .art.fit .sq{position:relative;height:100%;aspect-ratio:4/3;max-width:100%;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 10%,#000 90%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 10%,#000 90%,transparent 100%)}
+.dtile .art.fit .sq>video,.dtile .art.fit .sq>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:none!important;transform:none!important}
+.dtile .foot b{white-space:nowrap;overflow:hidden}
+/* mapa: sectores en menú desplegable */
+.dd{position:relative;margin-top:.45em}
+.ddbtn{width:100%;display:flex;align-items:center;gap:.55em;padding:.6em .9em;border-radius:.9em;border:1.5px solid var(--line);background:var(--surface);font-weight:800;font-size:.95em;color:var(--fg);text-align:left}
+.ddbtn .k{color:var(--muted);font-weight:700}
+.ddbtn .dot,.ddlist .dot{width:.75em;height:.75em;border-radius:50%;background:var(--c);flex:0 0 auto}
+.ddbtn .chev{margin-left:auto;width:1.1em;height:1.1em;transform:rotate(90deg);transition:transform .2s}
+.dd.open .ddbtn .chev{transform:rotate(-90deg)}
+.ddlist{display:none;position:absolute;left:0;right:0;top:calc(100% + .35em);z-index:30;background:var(--noche2,#062B1C);border:1.5px solid var(--line);border-radius:.9em;padding:.35em;box-shadow:0 1em 2em rgba(0,0,0,.5);max-height:60cqh;overflow-y:auto}
+.dd.open .ddlist{display:flex;flex-direction:column;gap:.2em}
+.ddlist .chip{width:100%;justify-content:flex-start;border:0;border-radius:.6em;padding:.65em .8em;font-size:.95em;color:var(--fg)}
+.ddlist .chip[aria-pressed=true]{background:var(--c);color:#00432C}
+.ddlist .chip[aria-pressed=true] .dot{background:#00432C}
+#mchips{display:block;overflow:visible}
+@media (min-aspect-ratio:1/1){.ddlist{position:static;display:none;box-shadow:none;max-height:none;margin-top:.35em}}
+/* resultados del mapa en vertical (sin deslizar de costado) */
+.mrow{flex-direction:column;align-items:stretch;overflow:visible;gap:0}
+.mrowhd{display:flex;align-items:center;gap:.5em;align-self:flex-start;background:#C6F032;color:#00432C;border:2px solid #00432C;border-radius:999px;padding:.5em 1em;font-weight:800;box-shadow:0 .3em 1em rgba(0,0,0,.4)}
+.mrowhd span{opacity:.75}
+.mrowhd svg{width:1em;height:1em;transform:rotate(-90deg);transition:transform .2s}
+.mrow.open .mrowhd svg{transform:rotate(90deg)}
+.mrowlist{display:none;flex-direction:column;gap:.35em;max-height:42cqh;overflow-y:auto;overscroll-behavior:contain;margin-top:.45em;background:var(--noche2,#062B1C);border:1.5px solid var(--line);border-radius:.9em;padding:.4em}
+.mrow.open .mrowlist{display:flex}
+.mrowlist .pitem{max-width:none!important;width:100%;box-shadow:none!important}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1136,7 +1164,7 @@ Object.assign(UI,{
   spSub:L('Las marcas que hacen la expo','As marcas que fazem a expo','The brands behind the expo','Die Marken hinter der Expo'),
 });
 const LVL=s=>s.lv==='oro'?UI.oro:s.lv==='plata'?UI.plata:s.lv==='outdoor'?UI.outdoorLv:s.lv==='master'?UI.masterLv:s.lv==='media'?UI.mediaP:UI.apoyo;
-Object.assign(UI,{fsOn:L('Pantalla completa','Tela cheia','Full screen','Vollbild'),fsOff:L('Salir de pantalla completa','Sair da tela cheia','Exit full screen','Vollbild beenden'),fitAll:L('Ver todo el mapa','Ver o mapa inteiro','Show whole map','Ganze Karte'),srcOff:L('Texto y logo: sitio oficial de la expo','Texto e logo: site oficial da expo','Text and logo: official expo website','Text und Logo: offizielle Messe-Website'),srcWeb:L('Texto: investigación web (DEMO)','Texto: pesquisa na web (DEMO)','Text: web research (DEMO)','Text: Webrecherche (DEMO)'),logoPend:L('Logo pendiente','Logo pendente','Logo pending','Logo folgt')});
+Object.assign(UI,{tMapT:L('Mapa','Mapa','Map','Karte'),tFoodT:L('Comida','Alimentação','Food','Essen'),sector:L('Sector','Setor','Area','Bereich'),seeList:L('Ver lista','Ver lista','See list','Liste'),fsOn:L('Pantalla completa','Tela cheia','Full screen','Vollbild'),fsOff:L('Salir de pantalla completa','Sair da tela cheia','Exit full screen','Vollbild beenden'),fitAll:L('Ver todo el mapa','Ver o mapa inteiro','Show whole map','Ganze Karte'),srcOff:L('Texto y logo: sitio oficial de la expo','Texto e logo: site oficial da expo','Text and logo: official expo website','Text und Logo: offizielle Messe-Website'),srcWeb:L('Texto: investigación web (DEMO)','Texto: pesquisa na web (DEMO)','Text: web research (DEMO)','Text: Webrecherche (DEMO)'),logoPend:L('Logo pendiente','Logo pendente','Logo pending','Logo folgt')});
 function brandMark(p,big){const b=p.brand;const nm=T(p.short||p.name);
   if(b&&b.lg)return `<span class="lgw${b.dk?' dk':''}"><img src="${b.lg}" alt="${esc(nm)}" loading="lazy"></span>`;
   const n=nm.length,fs=big?(n>22?1.5:n>14?2:2.6):(n>14?.62:n>8?.78:.95);
@@ -1442,14 +1470,16 @@ function dimStands(){return dimStands2();const m=mapMatches();const ids=m&&new S
 function renderMSearch(){
   $('mq').placeholder=T(UI.mq);if($('mq').value!==(st.mq||''))$('mq').value=st.mq||'';$('mqx').hidden=!st.mq;
   $('zIn').setAttribute('aria-label',T(UI.zIn));$('zOut').setAttribute('aria-label',T(UI.zOut));$('zFit').setAttribute('aria-label',T(UI.zFit));
-  $('mchips').innerHTML=MCATS.map(([k,n,c])=>`<button type="button" class="chip" data-mcat="${k}" aria-pressed="${(st.mcat||'all')===k}" style="--c:${c||CATS[k].c}">${k==='all'?'':'<span class="dot"></span>'}${esc(T(k==='all'?UI.all:(n||CATS[k].n)))}</button>`).join('');
+  {const cur=MCATS.find(([k])=>k===(st.mcat||'all'))||MCATS[0];const nm=([k,n])=>T(k==='all'?UI.all:(n||CATS[k].n)),cl=([k,n,c])=>c||CATS[k].c;
+  $('mchips').innerHTML=`<div class="dd" id="mdd"><button type="button" class="ddbtn" id="mddb" aria-expanded="false" style="--c:${cl(cur)}">${cur[0]==='all'?'':'<span class="dot"></span>'}<span class="k">${esc(T(UI.sector))}:</span><span>${esc(nm(cur))}</span>${ic('arrow').replace('class="i"','class="i chev"')}</button><div class="ddlist" role="listbox">${MCATS.map(o=>`<button type="button" class="chip" role="option" data-mcat="${o[0]}" aria-pressed="${(st.mcat||'all')===o[0]}" style="--c:${cl(o)}">${o[0]==='all'?'':'<span class="dot"></span>'}${esc(nm(o))}</button>`).join('')}</div></div>`;
+  $('mddb').onclick=e=>{e.stopPropagation();const d=$('mdd');const o=!d.classList.contains('open');d.classList.toggle('open',o);$('mddb').setAttribute('aria-expanded',o)}}
   renderMRes()}
 function renderMRes(){const m=mapMatches();const el=$('mres'),row=$('mrow');
   if(!m){el.hidden=true;el.innerHTML='';row.hidden=true;row.innerHTML='';if(!st.sel)$('whereBtn').hidden=false;return}
   const items=m.map(x=>`<button type="button" class="pitem" data-mgo="${x.id}" style="--c:${CATS[x.cat].c}"><span class="no">${x.no||ic(x.icon||CATS[x.cat].icon||'pin')}</span><span>${esc(T(x.name))}<small>${esc(T(CATS[x.cat].n))}</small></span></button>`).join('');
   const none=`<p class="empty">${esc(T(UI.noRes))}</p>`;
   el.hidden=false;el.innerHTML=m.length?items:none;el.scrollTop=0;
-  row.hidden=false;row.innerHTML=m.length?items:none;row.scrollLeft=0;$('whereBtn').hidden=true;$('mstrip').hidden=true;
+  row.hidden=false;row.classList.remove('open');row.innerHTML=m.length?`<button type="button" class="mrowhd" id="mrowhd"><b>${m.length}</b> ${esc(T(m.length===1?UI.place1:UI.places_n))}<span>· ${esc(T(UI.seeList))}</span>${ic('arrow')}</button><div class="mrowlist">${items}</div>`:none;if($('mrowhd'))$('mrowhd').onclick=e=>{e.stopPropagation();row.classList.toggle('open')};$('whereBtn').hidden=true;$('mstrip').hidden=true;
   fitMatches(m)}
 let fitT=0;function fitMatches(m){clearTimeout(fitT);fitT=setTimeout(()=>{if(st.view!=='map')return;
   if(!m||!m.length){mapFit(true);return}let b=[1e9,1e9,-1e9,-1e9];
@@ -1562,6 +1592,7 @@ function mfsOff(){if(!MFS)return;MFS=0;document.body.classList.remove('mfs','mfs
 addEventListener('resize',()=>{if(MFS)mfsUpd()});
 document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&MFS&&MFS_NATIVE)mfsOff()});
 addEventListener('keydown',e=>{if(e.key==='Escape'&&MFS)mfsOff()});
+document.addEventListener('click',e=>{const d=document.getElementById('mdd');if(d&&d.classList.contains('open')&&!e.target.closest('#mdd'))d.classList.remove('open')});
 
 const svgPt=(cx,cy)=>{const r=mRect();return[MV.x+(cx-r.left)/r.width*MV.w,MV.y+(cy-r.top)/r.height*MV.h]};
 (function(){const m=$('map'),PT=new Map();let drag=null,pinch=null,moved=false;
@@ -1669,18 +1700,23 @@ function renderHome(){
   h+=`</div></div>`;
   const arw=`<span class="go">${ic('arrow')}</span>`;
   const big=n=>ic(n).replace('class="i"','class="i big"');
-  const tile=(i,c,attrs,art,title,sub,badge,cls)=>`<button type="button" class="dtile${cls?' '+cls:''}" ${attrs} style="--i:${i};--c:${c}">${badge?`<span class="badge2">${badge}</span>`:''}<span class="art">${art}</span><span class="foot"><span class="tx"><b>${esc(title)}</b><small>${esc(sub)}</small></span>${arw}</span></button>`;
+  const ABG={ag:'#F80490',plano:'#00432C',expo:'#862CFA',food:'#C4EF21',spons:'#00432C',tix:'#F80597'};
+  const tile=(i,c,attrs,art,title,sub,badge,cls,ak)=>`<button type="button" class="dtile${cls?' '+cls:''}" ${attrs} style="--i:${i};--c:${c};--abg:${ABG[ak]||c}">${badge?`<span class="badge2">${badge}</span>`:''}<span class="art${ak&&IMG['v_'+ak]||ak&&IMG[ak]?' fit':''}">${ak&&(IMG['v_'+ak]||IMG[ak])?`<span class="sq">${art}</span>`:art}</span><span class="foot"><span class="tx"><b>${esc(title)}</b><small>${esc(sub)}</small></span>${arw}</span></button>`;
   const nTalks=TALKS.filter(vis).length;
   h+=`<div class="dgrid3 stagger">`;
-  h+=tile(0,'#FF7CC8','data-go="agenda"',media('ag','kb')||big('cal'),T(UI.tAg),`${nTalks} ${T(UI.talksN)} · 3 ${T(UI.daysN)}`,`<span class="rec"></span>${esc(T(UI.live).toUpperCase())}`,'hot');
-  h+=tile(1,'#C6F032','data-go="map"',media('plano','kb')||big('map'),T(UI.tMap),`${T(UI.youAre)} ${placeLabel(startPlace())}`);
-  h+=tile(2,'#B98CFF','data-go="list"',media('expo','kb')||big('store'),T(UI.tLoc),`${STANDS.filter(s=>s.named).length} ${T(UI.expos)}`);
-  h+=tile(3,'#F2FF5C','data-go="list" data-catgo="food"',media('food','kb')||`<img class="kb" src="${IMG.bowl}" alt="">`,T(UI.tFood),`${FOOD.length+BARS.length} ${T(UI.places_n)}`);
-  h+=tile(4,'#9AD9B5','data-go="spons"',media('spons','kb')||`<img class="xm" src="${IMG.xmark}" alt="">`,T(UI.tSp),'Advanced Nutrients · Papelito · Sadhu');
-  h+=tile(5,'#F4F4EE','data-go="tix"',media('tix','kb')||big('ticket'),T(UI.tTix),T(UI.tix27short),'2027');
+  h+=tile(0,'#FF7CC8','data-go="agenda"',media('ag','kb')||big('cal'),T(UI.tAg),`${nTalks} ${T(UI.talksN)} · 3 ${T(UI.daysN)}`,`<span class="rec"></span>${esc(T(UI.live).toUpperCase())}`,'hot','ag');
+  h+=tile(1,'#C6F032','data-go="map"',media('plano','kb')||big('map'),T(UI.tMapT),`${T(UI.youAre)} ${placeLabel(startPlace())}`,'','','plano');
+  h+=tile(2,'#B98CFF','data-go="list"',media('expo','kb')||big('store'),T(UI.tLoc),`${STANDS.filter(s=>s.named).length} ${T(UI.expos)}`,'','','expo');
+  h+=tile(3,'#F2FF5C','data-go="list" data-catgo="food"',media('food','kb')||`<img class="kb" src="${IMG.bowl}" alt="">`,T(UI.tFoodT),`${FOOD.length+BARS.length} ${T(UI.places_n)}`,'','','food');
+  h+=tile(4,'#9AD9B5','data-go="spons"',media('spons','kb')||`<img class="xm" src="${IMG.xmark}" alt="">`,T(UI.tSp),'Advanced Nutrients · Papelito · Sadhu','','','spons');
+  h+=tile(5,'#F4F4EE','data-go="tix"',media('tix','kb')||big('ticket'),T(UI.tTix),T(UI.tix27short),'2027','','tix');
   h+=`</div>`;
-  $('homeIn').innerHTML=h;$('homeIn').scrollTop=0;
+  $('homeIn').innerHTML=h;$('homeIn').scrollTop=0;requestAnimationFrame(fitTiles);
 }
+function fitTiles(){const bs=[...document.querySelectorAll('#homeIn .dtile .foot b')];if(!bs.length)return;bs.forEach(b=>b.style.fontSize='');
+  let k=1;bs.forEach(b=>{const w=b.parentElement.clientWidth;if(b.scrollWidth>w&&w>0)k=Math.min(k,w/b.scrollWidth)});
+  if(k<1){const f=parseFloat(getComputedStyle(bs[0]).fontSize)*k*0.97;bs.forEach(b=>b.style.fontSize=f+'px')}}
+addEventListener('resize',()=>{clearTimeout(window.__ft);window.__ft=setTimeout(fitTiles,150)});
 const LOCS=[
  {k:'food',n:UI.food,c:'#F2FF5C',img:'food',items:()=>[...FOOD,...BARS]},
  {k:'cult',img:'cult'},{k:'plurA',img:'plur'},{k:'plurB',img:'plur'},{k:'plurC',img:'plur'},{k:'med',img:'med'},{k:'out',img:'spons'},
