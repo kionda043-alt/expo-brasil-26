@@ -813,6 +813,25 @@ body.can-admin .adbtn{display:flex!important}
 .plink{display:inline-flex;align-items:center;gap:.4em;padding:.45em .9em;border-radius:99em;background:#fff;color:#00432C;border:2px solid var(--ink);font-family:var(--f-cond);font-size:1.05em;text-decoration:none;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .plink svg{width:1.1em;height:1.1em;flex:0 0 auto}
 .lgw.dk{background:#00432C}
+/* mapa en pantalla completa */
+.mzoom #zFull{background:#C6F032;color:#00432C;border-color:#00432C}
+body.mfs .mapwrap{position:fixed!important;left:0;top:0;width:100vw;height:100vh;height:100dvh;z-index:2000;margin:0!important;border-radius:0;border:0;font-size:clamp(14px,2.4vmin,30px);font-family:var(--f-body);color:var(--fg)}
+body.mfs.mfsrot .mapwrap{left:100vw;width:100vh;width:100dvh;height:100vw;transform:rotate(90deg);transform-origin:0 0}
+body.mfs{overflow:hidden}
+body.mfs .mapwrap .spstrip,body.mfs .mapwrap .mapback,body.mfs .mapwrap .mrow{display:none!important}
+body.mfs .mzoom{top:max(.8em,env(safe-area-inset-top,0px));right:max(.8em,env(safe-area-inset-right,0px))}
+body.mfs .mzoom button{width:3em;height:3em}
+#map{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+/* horizontal: ajustes */
+@media (min-aspect-ratio:1/1){
+  .place .phero.lgh{height:auto!important;aspect-ratio:4/3;max-height:58cqh}
+  .lgrid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  #vMap .msearch{overflow-y:auto;overscroll-behavior:contain}
+}
+@media (min-aspect-ratio:1/1) and (max-height:500px){
+  #vMap .msearch{padding-bottom:.4em}
+  .bnav button{min-height:2.4em;padding:.35em .9em}
+}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -847,7 +866,7 @@ body.can-admin .adbtn{display:flex!important}
  <symbol id="ic-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></symbol>
  <symbol id="ic-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
  <symbol id="ic-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
- <symbol id="ic-fit" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol>
+ <symbol id="ic-fit" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></symbol><symbol id="ic-full" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></symbol><symbol id="ic-fsx" viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></symbol>
 </svg>
 
 <div class="app" id="app">
@@ -878,7 +897,7 @@ body.can-admin .adbtn{display:flex!important}
     <div class="view" id="vMap" hidden>
     <div class="msearch"><div class="msrow"><svg class="i" aria-hidden="true"><use href="#ic-search"/></svg><input id="mq" type="search" autocomplete="off" enterkeyhint="search"><button type="button" class="x2" id="mqx" hidden><svg class="i" aria-hidden="true"><use href="#ic-close"/></svg></button></div><div class="chips" id="mchips" role="group"></div><div class="mres" id="mres" hidden></div></div>
     <div class="mapwrap">
-      <div class="mzoom"><button type="button" id="zIn"><svg class="i" aria-hidden="true"><use href="#ic-plus"/></svg></button><button type="button" id="zOut"><svg class="i" aria-hidden="true"><use href="#ic-minus"/></svg></button><button type="button" id="zFit"><svg class="i" aria-hidden="true"><use href="#ic-fit"/></svg></button></div>
+      <div class="mzoom"><button type="button" id="zIn"><svg class="i" aria-hidden="true"><use href="#ic-plus"/></svg></button><button type="button" id="zOut"><svg class="i" aria-hidden="true"><use href="#ic-minus"/></svg></button><button type="button" id="zFit"><svg class="i" aria-hidden="true"><use href="#ic-fit"/></svg></button><button type="button" id="zFull"><svg class="i" aria-hidden="true"><use href="#ic-full"/></svg></button></div>
       <div class="mstrip" id="mstrip" hidden></div>
       <div class="mrow" id="mrow" hidden></div>
       <div class="sheet" id="sheet" role="dialog" aria-modal="false"></div>
@@ -1117,7 +1136,7 @@ Object.assign(UI,{
   spSub:L('Las marcas que hacen la expo','As marcas que fazem a expo','The brands behind the expo','Die Marken hinter der Expo'),
 });
 const LVL=s=>s.lv==='oro'?UI.oro:s.lv==='plata'?UI.plata:s.lv==='outdoor'?UI.outdoorLv:s.lv==='master'?UI.masterLv:s.lv==='media'?UI.mediaP:UI.apoyo;
-Object.assign(UI,{srcOff:L('Texto y logo: sitio oficial de la expo','Texto e logo: site oficial da expo','Text and logo: official expo website','Text und Logo: offizielle Messe-Website'),srcWeb:L('Texto: investigación web (DEMO)','Texto: pesquisa na web (DEMO)','Text: web research (DEMO)','Text: Webrecherche (DEMO)'),logoPend:L('Logo pendiente','Logo pendente','Logo pending','Logo folgt')});
+Object.assign(UI,{fsOn:L('Pantalla completa','Tela cheia','Full screen','Vollbild'),fsOff:L('Salir de pantalla completa','Sair da tela cheia','Exit full screen','Vollbild beenden'),fitAll:L('Ver todo el mapa','Ver o mapa inteiro','Show whole map','Ganze Karte'),srcOff:L('Texto y logo: sitio oficial de la expo','Texto e logo: site oficial da expo','Text and logo: official expo website','Text und Logo: offizielle Messe-Website'),srcWeb:L('Texto: investigación web (DEMO)','Texto: pesquisa na web (DEMO)','Text: web research (DEMO)','Text: Webrecherche (DEMO)'),logoPend:L('Logo pendiente','Logo pendente','Logo pending','Logo folgt')});
 function brandMark(p,big){const b=p.brand;const nm=T(p.short||p.name);
   if(b&&b.lg)return `<span class="lgw${b.dk?' dk':''}"><img src="${b.lg}" alt="${esc(nm)}" loading="lazy"></span>`;
   const n=nm.length,fs=big?(n>22?1.5:n>14?2:2.6):(n>14?.62:n>8?.78:.95);
@@ -1502,7 +1521,7 @@ function openPlace(p,extra){
 
 /* ---------- zoom del plano: dos dedos, rueda y botones ---------- */
 const MV={x:MX0,y:MY0,w:MX1-MX0,h:MY1-MY0};let zAnim=0;
-function mRect(){return $('map').getBoundingClientRect()}
+function mRect(){if(window.ROT){const w=document.querySelector('.mapwrap');return{left:0,top:0,width:w.clientWidth,height:w.clientHeight,right:w.clientWidth,bottom:w.clientHeight}}return $('map').getBoundingClientRect()}
 function fitTo(b,pd,minS){const r=mRect();const W=Math.max(40,r.width-pd.l-pd.r),H=Math.max(40,r.height-pd.t-pd.b);
   const bw=b[2]-b[0],bh=b[3]-b[1];let sc=Math.max(bw/W,bh/H);if(minS)sc=Math.max(sc,minS);
   return{x:b[0]-pd.l*sc-(W*sc-bw)/2,y:b[1]-pd.t*sc-(H*sc-bh)/2,w:r.width*sc,h:r.height*sc}}
@@ -1524,22 +1543,42 @@ function zoomToRoute(R){const pts=[...R.pts,startPt()];let b=[1e9,1e9,-1e9,-1e9]
   pts.forEach(add);if(window.ME_BOX)add(ME_BOX);if(window.DEST_BOX)add(DEST_BOX);b=[b[0]-30,b[1]-30,b[2]+30,b[3]+30];
   const r=mRect(),z=$('zIn').parentNode,f=fitVB();
   animVB(fitTo(b,{t:14,b:botPad(),l:14,r:z.offsetWidth+22},f.w/6/r.width))}
+/* ---------- mapa en pantalla completa (tipo YouTube) ---------- */
+window.MFS=0;window.ROT=0;let MFS_NATIVE=false;
+const CXY=e=>{if(!ROT)return[e.clientX,e.clientY];const R=document.querySelector('.mapwrap').getBoundingClientRect();return[e.clientY-R.top,R.right-e.clientX]};
+function mfsUpd(){const r=MFS&&innerHeight>innerWidth*1.05?1:0;
+  if(r!==ROT){ROT=r;document.body.classList.toggle('mfsrot',!!r)}
+  const b=$('zFull');if(b){b.innerHTML=`<svg class="i" aria-hidden="true"><use href="#${MFS?'ic-fsx':'ic-full'}"/></svg>`;b.setAttribute('aria-label',T(MFS?UI.fsOff:UI.fsOn));b.title=T(MFS?UI.fsOff:UI.fsOn)}
+  requestAnimationFrame(()=>{if(st.view!=='map')return;if(st.sel)setVB(MV);else mapFit()})}
+let MFS_PH=null;
+async function mfsOn(){if(MFS)return;MFS=1;const w=document.querySelector('.mapwrap');MFS_PH=document.createComment('mapwrap');w.parentNode.insertBefore(MFS_PH,w);document.body.appendChild(w);document.body.classList.add('mfs');MFS_NATIVE=false;
+  try{const el=document.documentElement;if(el.requestFullscreen&&!document.fullscreenElement){await el.requestFullscreen({navigationUI:'hide'});MFS_NATIVE=true}}catch(_){}
+  try{if(MFS_NATIVE&&screen.orientation&&screen.orientation.lock)await screen.orientation.lock('landscape')}catch(_){}
+  mfsUpd();setTimeout(mfsUpd,350)}
+function mfsOff(){if(!MFS)return;MFS=0;document.body.classList.remove('mfs','mfsrot');ROT=0;const w=document.querySelector('.mapwrap');if(MFS_PH&&MFS_PH.parentNode){MFS_PH.parentNode.insertBefore(w,MFS_PH);MFS_PH.remove();MFS_PH=null}
+  try{screen.orientation&&screen.orientation.unlock&&screen.orientation.unlock()}catch(_){}
+  try{if(document.fullscreenElement)document.exitFullscreen()}catch(_){}
+  mfsUpd();setTimeout(mfsUpd,350)}
+addEventListener('resize',()=>{if(MFS)mfsUpd()});
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&MFS&&MFS_NATIVE)mfsOff()});
+addEventListener('keydown',e=>{if(e.key==='Escape'&&MFS)mfsOff()});
+
 const svgPt=(cx,cy)=>{const r=mRect();return[MV.x+(cx-r.left)/r.width*MV.w,MV.y+(cy-r.top)/r.height*MV.h]};
 (function(){const m=$('map'),PT=new Map();let drag=null,pinch=null,moved=false;
-  m.addEventListener('pointerdown',e=>{PT.set(e.pointerId,[e.clientX,e.clientY]);cancelAnimationFrame(zAnim);
-    if(PT.size===1){drag={x:e.clientX,y:e.clientY,vb:{...MV}};moved=false}
+  m.addEventListener('pointerdown',e=>{PT.set(e.pointerId,CXY(e));cancelAnimationFrame(zAnim);
+    if(PT.size===1){const q=CXY(e);drag={x:q[0],y:q[1],vb:{...MV}};moved=false}
     else if(PT.size===2){const[a,b]=[...PT.values()];pinch={d:Math.hypot(a[0]-b[0],a[1]-b[1])||1,vb:{...MV},c:svgPt((a[0]+b[0])/2,(a[1]+b[1])/2)};moved=true}});
-  addEventListener('pointermove',e=>{if(!PT.has(e.pointerId))return;PT.set(e.pointerId,[e.clientX,e.clientY]);const r=mRect();
+  addEventListener('pointermove',e=>{if(!PT.has(e.pointerId))return;PT.set(e.pointerId,CXY(e));const r=mRect();
     if(PT.size>=2&&pinch){const[a,b]=[...PT.values()];const f=Math.hypot(a[0]-b[0],a[1]-b[1])/pinch.d;const w=pinch.vb.w/f,h=pinch.vb.h/f;const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2;
       setVB({x:pinch.c[0]-(mx-r.left)/r.width*w,y:pinch.c[1]-(my-r.top)/r.height*h,w,h})}
-    else if(drag){const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(!moved&&Math.hypot(dx,dy)>7)moved=true;
+    else if(drag){const q=CXY(e),dx=q[0]-drag.x,dy=q[1]-drag.y;if(!moved&&Math.hypot(dx,dy)>7)moved=true;
       if(moved)setVB({x:drag.vb.x-dx/r.width*drag.vb.w,y:drag.vb.y-dy/r.height*drag.vb.h,w:drag.vb.w,h:drag.vb.h})}},{passive:true});
   const up=e=>{if(!PT.has(e.pointerId))return;PT.delete(e.pointerId);if(PT.size<2)pinch=null;
     if(PT.size===1){const[q]=[...PT.values()];drag={x:q[0],y:q[1],vb:{...MV}}}else if(!PT.size)drag=null};
   addEventListener('pointerup',up);addEventListener('pointercancel',up);
   m.addEventListener('click',e=>{if(moved){e.stopPropagation();e.preventDefault();moved=false}},true);
-  m.addEventListener('wheel',e=>{e.preventDefault();cancelAnimationFrame(zAnim);const c=svgPt(e.clientX,e.clientY),f=e.deltaY<0?1.15:1/1.15;setVB({x:c[0]-(c[0]-MV.x)/f,y:c[1]-(c[1]-MV.y)/f,w:MV.w/f,h:MV.h/f})},{passive:false});
-  $('zIn').addEventListener('click',()=>zoomBy(1.6));$('zOut').addEventListener('click',()=>zoomBy(1/1.6));$('zFit').addEventListener('click',()=>mapFit(true,true));
+  m.addEventListener('wheel',e=>{e.preventDefault();cancelAnimationFrame(zAnim);const c=svgPt(...CXY(e)),f=e.deltaY<0?1.15:1/1.15;setVB({x:c[0]-(c[0]-MV.x)/f,y:c[1]-(c[1]-MV.y)/f,w:MV.w/f,h:MV.h/f})},{passive:false});
+  $('zIn').addEventListener('click',()=>zoomBy(1.6));$('zOut').addEventListener('click',()=>zoomBy(1/1.6));$('zFit').addEventListener('click',()=>mapFit(true,true));$('zFull').addEventListener('click',()=>MFS?mfsOff():mfsOn());
   try{new ResizeObserver(()=>{if(st.view!=='map')return;if(st.sel)setVB(MV);else mapFit()}).observe(document.querySelector('.mapwrap'))}catch(_){}
 })();
 function closeSheet(){const had=!!st.sel;st.sel=null;st.extra=null;st.listing=false;$('sheet').classList.remove('open');$('mstrip').hidden=true;$('whereBtn').hidden=false;drawRoute(null);drawMe();if(had&&st.view==='map')mapFit(true)}
@@ -1606,7 +1645,7 @@ $('bHome').addEventListener('click',()=>{resetNav();closeSheet();stopPick();go('
 
 /* ---------- vistas: inicio · locales · agenda · plano ---------- */
 const media=(key,cls)=>IMG['v_'+key]?`<video class="${cls||''}" src="${IMG['v_'+key]}" muted loop playsinline autoplay></video>`:IMG[key]?`<img class="${cls||''}" src="${IMG[key]}" alt="">`:'';
-function go(v,opt){if(st.view===v&&!opt)return;const prev=st.view;st.view=v;if(v!=='map'){closeSheet();stopPick()}
+function go(v,opt){if(v!=='map'&&window.MFS)mfsOff();if(st.view===v&&!opt)return;const prev=st.view;st.view=v;if(v!=='map'){closeSheet();stopPick()}
   ['Home','List','Agenda','Map','Tix','Spons','Place','Admin'].forEach(n=>$('v'+n).hidden=('v'+n)!==('v'+v[0].toUpperCase()+v.slice(1)));
   if(v==='home')renderHome();if(v==='list')renderLocales();if(v==='agenda')renderAgenda();if(v==='tix')renderTix();if(v==='spons')renderSpons();if(v==='place')renderPlace();if(v==='admin')renderAdmin();renderNav();
   if(v==='map'){const m=$('map');m.classList.remove('noanim');renderMap();renderMSearch();mapFit();setTimeout(()=>m.classList.add('noanim'),1400)}
@@ -1881,7 +1920,7 @@ $('homeBtn').addEventListener('click',()=>{resetNav();closeSheet();stopPick();go
 let loading=false;
 function hideAttract(){if(loading)return;loading=true;const L=$('loader');L.hidden=false;L.innerHTML=L.innerHTML;$('loadX').src=IMG.xmark;$('loadTxt').textContent=T(UI.loading);snd('load');
   setTimeout(()=>{$('attract').hidden=true;st.view=null;go('home');setTimeout(()=>{L.hidden=true;loading=false},250)},reduce?200:1250);bump()}
-function showAttract(){resetNav();st.mq='';st.mcat='all';closeSheet();stopPick();st.from='entry';lang='pt';st.tab='stands';st.cat='all';st.q='';st.day=21;st.lcat=null;st.ag='talks';st.room='all';$('qrModal').hidden=true;renderAll();go('home',true);$('attract').hidden=false}
+function showAttract(){if(window.MFS)mfsOff();resetNav();st.mq='';st.mcat='all';closeSheet();stopPick();st.from='entry';lang='pt';st.tab='stands';st.cat='all';st.q='';st.day=21;st.lcat=null;st.ag='talks';st.room='all';$('qrModal').hidden=true;renderAll();go('home',true);$('attract').hidden=false}
 
 let qrDone=false;const QR_URL=location.href.split('#')[0];
 $('qrBtn').addEventListener('click',()=>{$('qrModal').hidden=false;
