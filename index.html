@@ -860,6 +860,14 @@ body.mfs .mzoom button{width:3em;height:3em}
 .mrowlist{display:none;flex-direction:column;gap:.35em;max-height:42cqh;overflow-y:auto;overscroll-behavior:contain;margin-top:.45em;background:var(--noche2,#062B1C);border:1.5px solid var(--line);border-radius:.9em;padding:.4em}
 .mrow.open .mrowlist{display:flex}
 .mrowlist .pitem{max-width:none!important;width:100%;box-shadow:none!important}
+/* admin: ingreso */
+.adlogin{max-width:26em;margin:1.5em auto 0;display:flex;flex-direction:column;gap:.7em;background:var(--surface);border:1.5px solid var(--line);border-radius:1.1em;padding:1.3em}
+.adlogin h3{font-family:var(--f-head);text-transform:uppercase;font-size:1.5em;margin:0;color:#C6F032}
+.adlogin .lk{display:none}
+.adlogin .warn{color:#FF9EB5}
+.admin .vhead{display:flex;align-items:center;gap:.6em;flex-wrap:wrap}
+.adout{margin-left:auto;font-size:.8em}
+.adrooms{flex-wrap:wrap;overflow:visible}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -1164,7 +1172,7 @@ Object.assign(UI,{
   spSub:L('Las marcas que hacen la expo','As marcas que fazem a expo','The brands behind the expo','Die Marken hinter der Expo'),
 });
 const LVL=s=>s.lv==='oro'?UI.oro:s.lv==='plata'?UI.plata:s.lv==='outdoor'?UI.outdoorLv:s.lv==='master'?UI.masterLv:s.lv==='media'?UI.mediaP:UI.apoyo;
-Object.assign(UI,{tMapT:L('Mapa','Mapa','Map','Karte'),tFoodT:L('Comida','Alimentação','Food','Essen'),sector:L('Sector','Setor','Area','Bereich'),seeList:L('Ver lista','Ver lista','See list','Liste'),fsOn:L('Pantalla completa','Tela cheia','Full screen','Vollbild'),fsOff:L('Salir de pantalla completa','Sair da tela cheia','Exit full screen','Vollbild beenden'),fitAll:L('Ver todo el mapa','Ver o mapa inteiro','Show whole map','Ganze Karte'),srcOff:L('Texto y logo: sitio oficial de la expo','Texto e logo: site oficial da expo','Text and logo: official expo website','Text und Logo: offizielle Messe-Website'),srcWeb:L('Texto: investigación web (DEMO)','Texto: pesquisa na web (DEMO)','Text: web research (DEMO)','Text: Webrecherche (DEMO)'),logoPend:L('Logo pendiente','Logo pendente','Logo pending','Logo folgt')});
+Object.assign(UI,{adOnly:L('Acceso solo para la organización','Acesso só para a organização','Organizers only','Nur für das Orga-Team'),adOnlySub:L('Ingresá con tu usuario y contraseña. Los cambios se ven al instante en todos los tótems y celulares.','Entre com seu usuário e senha. As mudanças aparecem na hora em todos os totens e celulares.','Sign in with your username and password. Changes show instantly on every kiosk and phone.','Mit Benutzername und Passwort anmelden. Änderungen erscheinen sofort auf allen Totems und Handys.'),adUser:L('Usuario','Usuário','Username','Benutzername'),adPass:L('Contraseña','Senha','Password','Passwort'),adEnter:L('Entrar','Entrar','Sign in','Anmelden'),adLogout:L('Salir','Sair','Sign out','Abmelden'),adWelcome:L('Listo, ya podés editar','Pronto, já pode editar','Signed in','Angemeldet'),adBadLogin:L('Usuario o contraseña incorrectos','Usuário ou senha incorretos','Wrong username or password','Benutzername oder Passwort falsch'),adNeedLogin:L('Ingresá como admin para guardar','Entre como admin para salvar','Sign in as admin to save','Zum Speichern anmelden'),adNoNet:L('Sin conexión con el servidor. Revisá internet.','Sem conexão com o servidor. Verifique a internet.','No connection to the server. Check the internet.','Keine Verbindung zum Server.'),tMapT:L('Mapa','Mapa','Map','Karte'),tFoodT:L('Comida','Alimentação','Food','Essen'),sector:L('Sector','Setor','Area','Bereich'),seeList:L('Ver lista','Ver lista','See list','Liste'),fsOn:L('Pantalla completa','Tela cheia','Full screen','Vollbild'),fsOff:L('Salir de pantalla completa','Sair da tela cheia','Exit full screen','Vollbild beenden'),fitAll:L('Ver todo el mapa','Ver o mapa inteiro','Show whole map','Ganze Karte'),srcOff:L('Texto y logo: sitio oficial de la expo','Texto e logo: site oficial da expo','Text and logo: official expo website','Text und Logo: offizielle Messe-Website'),srcWeb:L('Texto: investigación web (DEMO)','Texto: pesquisa na web (DEMO)','Text: web research (DEMO)','Text: Webrecherche (DEMO)'),logoPend:L('Logo pendiente','Logo pendente','Logo pending','Logo folgt')});
 function brandMark(p,big){const b=p.brand;const nm=T(p.short||p.name);
   if(b&&b.lg)return `<span class="lgw${b.dk?' dk':''}"><img src="${b.lg}" alt="${esc(nm)}" loading="lazy"></span>`;
   const n=nm.length,fs=big?(n>22?1.5:n>14?2:2.6):(n>14?.62:n>8?.78:.95);
@@ -1774,28 +1782,49 @@ function applyEdits(){snapAll();
   Object.keys(RCACHE).forEach(k=>delete RCACHE[k]);
 }
 function rerender(){applyEdits();GRID=null;try{renderAll()}catch(err){console.error(err)}}
+/* Supabase: una sola fuente de verdad para tótems, celulares y admin (en vivo) */
+const SB_URL='https://itnxcvnmmoqgeijerjqj.supabase.co',SB_KEY='sb_publishable_jJ7O9A5iqqLoeyWF1SYZZQ_LQpd4vLK';
+const LS=(k,v)=>{try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v)}catch(_){return null}};
+ADM.tok=LS('expoBrTok')||null;
+function sbLoad(){const one=src=>new Promise((ok,ko)=>{const s=document.createElement('script');s.src=src;s.onload=ok;s.onerror=ko;document.head.appendChild(s)});return window.supabase?Promise.resolve():one('assets/js/supabase.min.js').catch(()=>one('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js'))}
+function admApply(edits,cfg,fromCache){ADM.edits=edits||{};ADM.cfg=cfg||{};rerender();if(st.view==='admin')renderAdmin();if(st.view==='tix')renderTix();
+  if(!fromCache)LS('expoBrData',JSON.stringify({e:ADM.edits,c:ADM.cfg,at:Date.now()}))}
+(()=>{try{const c=JSON.parse(LS('expoBrData')||'null');if(c)admApply(c.e,c.c,true)}catch(_){}})();
+let admPullT=0;
+async function admPull(){if(!ADM.db)return;try{
+  const [e,c]=await Promise.all([ADM.db.from('expo_br_edits').select('id,body'),ADM.db.from('expo_br_config').select('id,body')]);
+  if(e.error||c.error)throw e.error||c.error;
+  const ed={};e.data.forEach(r=>ed[r.id]=r.body);const cf=(c.data.find(r=>r.id==='main')||{}).body||{};
+  ADM.status='ok';admApply(ed,cf)}catch(err){ADM.status='err';if(st.view==='admin')renderAdmin()}}
+const admPullSoon=()=>{clearTimeout(admPullT);admPullT=setTimeout(admPull,250)};
 (async()=>{try{
-  const [db,user]=await Promise.all([window.claude?.use?.('db'),window.claude?.use?.('user')]);
-  ADM.user=user||null;ADM.can=!!(user&&(await user.canEdit?.()));ADM.db=db||null;
-  if(ADM.can)document.body.classList.add('can-admin');
-  if(!db)return;
-  const t=setTimeout(()=>{ADM.status='slow';if(st.view==='admin')renderAdmin()},10000);
-  db.collection('edits').onSnapshot(s=>{clearTimeout(t);const e={};s.docs.forEach(d=>{if(d.exists)e[d.id]=d.data()});ADM.edits=e;ADM.status='ok';rerender();if(st.view==='admin')renderAdmin()},err=>{clearTimeout(t);ADM.status='err';if(st.view==='admin')renderAdmin()});
-  db.doc('config/main').onSnapshot(s=>{ADM.cfg=s.exists?{...s.data()}:{};if(st.view==='tix')renderTix()},()=>{});
-}catch(_){}})();
+  await sbLoad();ADM.db=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
+  await admPull();
+  ADM.db.channel('expo_br_live').on('postgres_changes',{event:'*',schema:'public',table:'expo_br_edits'},admPullSoon).on('postgres_changes',{event:'*',schema:'public',table:'expo_br_config'},admPullSoon).subscribe(s=>{ADM.live=s==='SUBSCRIBED';if(st.view==='admin')renderAdmin()});
+  setInterval(admPull,60000);addEventListener('online',admPull);document.addEventListener('visibilitychange',()=>{if(!document.hidden)admPull()});
+  if(ADM.tok){const r=await ADM.db.rpc('expo_br_whoami',{tok:ADM.tok});if(r.data){ADM.can=true;ADM.user=r.data;document.body.classList.add('can-admin')}else{ADM.tok=null;LS('expoBrTok',null)}}
+  if(st.view==='admin')renderAdmin();
+}catch(_){ADM.status='err';if(st.view==='admin')renderAdmin()}})();
+async function admLogin(u,p){if(!ADM.db){toast(T(UI.adErr));return}
+  const r=await ADM.db.rpc('expo_br_login',{u,p});
+  if(r.data){ADM.tok=r.data;LS('expoBrTok',r.data);ADM.can=true;ADM.user=u.trim().toLowerCase();document.body.classList.add('can-admin');toast(T(UI.adWelcome));renderAdmin()}
+  else{toast(T(UI.adBadLogin));const p2=$('al_p');if(p2){p2.value='';p2.focus()}}}
+async function admLogout(){try{if(ADM.db&&ADM.tok)await ADM.db.rpc('expo_br_logout',{tok:ADM.tok})}catch(_){}ADM.tok=null;LS('expoBrTok',null);ADM.can=false;ADM.user=null;document.body.classList.remove('can-admin');renderAdmin()}
+async function admRpc(fn,args){if(!ADM.db||!ADM.can){toast(T(UI.adNeedLogin));return false}
+  const r=await ADM.db.rpc(fn,Object.assign({tok:ADM.tok},args));
+  if(r.error){if(/unauthorized/.test(r.error.message||'')){ADM.can=false;ADM.tok=null;LS('expoBrTok',null);renderAdmin();toast(T(UI.adNeedLogin))}else toast(T(UI.adErr));return false}
+  admPullSoon();return true}
 const ticketUrl=()=>ADM.cfg.ticketUrl||TICKET_URL;
-async function saveEdit(id,body){
-  if(!ADM.db||!ADM.can){ADM.edits[id]=body;ADM.local=true;rerender();renderAdmin();toast(T(UI.adLocal));return}
-  try{await ADM.db.collection('edits').doc(id).set(Object.assign({},body,{at:Date.now()}));toast(T(UI.adSaved))}catch(e){toast(T(UI.adErr))}}
-async function dropEdit(id){if(!ADM.db||!ADM.can){delete ADM.edits[id];rerender();renderAdmin();return}
-  try{await ADM.db.collection('edits').doc(id).delete();toast(T(UI.adReverted))}catch(e){toast(T(UI.adErr))}}
-async function saveCfg(body){if(!ADM.db||!ADM.can){Object.assign(ADM.cfg,body);toast(T(UI.adLocal));return}
-  try{await ADM.db.doc('config/main').set(Object.assign({},ADM.cfg,body));toast(T(UI.adSaved))}catch(e){toast(T(UI.adErr))}}
+async function saveEdit(id,body){if(await admRpc('expo_br_save_edit',{eid:id,b:Object.assign({},body,{at:Date.now()})}))toast(T(UI.adSaved))}
+async function dropEdit(id){if(await admRpc('expo_br_drop_edit',{eid:id}))toast(T(UI.adReverted))}
+async function saveCfg(body){if(await admRpc('expo_br_save_cfg',{b:Object.assign({},ADM.cfg,body)}))toast(T(UI.adSaved))}
 const fld=(id,lab,val,type,extra)=>`<label class="af"><span>${esc(T(lab))}</span><input id="${id}" type="${type||'text'}" value="${esc(val??'')}" ${extra||''}></label>`;
 function renderAdmin(){
   const can=ADM.can,q=norm(ADM.q);
-  let h=`<div class="fill admin"><div class="vhead">${backBtn('home')}<h2>Admin<small>${esc(T(UI.adSub))}</small></h2></div>`;
-  h+=`<div class="adstat ${can&&ADM.db?'on':''}">${can&&ADM.db?`${ic('pin')}${esc(T(UI.adLive))}`:`${ic('close')}${esc(T(UI.adOff))}`}${ADM.status==='slow'?` · ${esc(T(UI.adSlow))}`:''}</div>`;
+  let h=`<div class="fill admin"><div class="vhead">${backBtn('home')}<h2>Admin<small>${esc(T(UI.adSub))}</small></h2>${can?`<button type="button" class="pb ghost adout" id="adOut">${esc(T(UI.adLogout))} · ${esc(ADM.user||'')}</button>`:''}</div>`;
+  if(!can){h+=`<form class="adlogin" id="adLogin" autocomplete="on"><div class="lk">${ic('close').replace('class="i"','class="i lkic"')}</div><h3>${esc(T(UI.adOnly))}</h3><p class="fine">${esc(T(UI.adOnlySub))}</p><label class="af"><span>${esc(T(UI.adUser))}</span><input id="al_u" name="username" autocomplete="username" autocapitalize="none" required></label><label class="af"><span>${esc(T(UI.adPass))}</span><input id="al_p" name="password" type="password" autocomplete="current-password" required></label><div class="adb"><button type="submit" class="pb">${esc(T(UI.adEnter))}</button></div>${ADM.status==='err'?`<p class="fine warn">${esc(T(UI.adNoNet))}</p>`:''}</form></div>`;
+    $('adIn').innerHTML=h;$('adLogin').addEventListener('submit',e=>{e.preventDefault();admLogin($('al_u').value,$('al_p').value)});return}
+  h+=`<div class="adstat ${ADM.status==='ok'?'on':''}">${ADM.status==='ok'?`${ic('pin')}${esc(T(UI.adLive))}`:`${ic('close')}${esc(T(UI.adNoNet))}`}</div>`;
   h+=`<div class="seg" role="group">${[['prog','cal',UI.tAg],['stands','map',UI.adStands],['cfg','ticket',UI.adCfg]].map(([k,i,n])=>`<button type="button" data-adtab="${k}" aria-pressed="${ADM.tab===k}">${ic(i)}${esc(T(n))}</button>`).join('')}</div>`;
   if(ADM.tab!=='cfg')h+=`<input class="search" id="adq" type="search" autocomplete="off" placeholder="${esc(T(ADM.tab==='stands'?UI.adQs:UI.adQp))}" value="${esc(ADM.q)}">`;
   if(ADM.tab==='stands'){
@@ -1814,7 +1843,7 @@ function renderAdmin(){
   }else{
     h+=`<div class="adf solo">${fld('af_url',UI.adUrl,ticketUrl(),'url')}<div class="adb"><button type="button" class="pb" data-adcfg="1">${esc(T(UI.adSave))}</button></div></div>`;
   }
-  h+=`</div>`;$('adIn').innerHTML=h;
+  h+=`</div>`;$('adIn').innerHTML=h;if($('adOut'))$('adOut').onclick=admLogout;
   const qi=$('adq');if(qi)qi.addEventListener('input',e=>{ADM.q=e.target.value;const p=e.target.selectionStart;renderAdmin();const n=$('adq');n.focus();try{n.setSelectionRange(p,p)}catch(_){}});
   const sl=$('af_sales');if(sl)sl.addEventListener('change',e=>{st.sales=e.target.checked;renderMap()});
 }
